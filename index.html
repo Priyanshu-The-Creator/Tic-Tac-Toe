@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic Tac Toe - by Priyansh</title>
+
+  <!-- Orbitron Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    body {
+      background: #121212;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px;
+    }
+
+    h1 {
+      margin: 20px 0;
+      font-size: 2rem;
+      color: #00ffc3;
+      text-shadow: none;
+    }
+
+    .game-info {
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+      text-shadow: 0 0 5px #00ffc3;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 10px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: #1e1e1e;
+      border: 2px solid #00ffc3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      cursor: pointer;
+      transition: background 0.3s, transform 0.2s;
+      text-shadow: 0 0 4px #00ffc3;
+    }
+
+    .cell:hover {
+      background: #2a2a2a;
+      transform: scale(1.05);
+    }
+
+    .cell.win {
+      background: #00ffc3;
+      color: #121212;
+      font-weight: bold;
+      text-shadow: none;
+    }
+
+    .controls {
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      background: #00ffc3;
+      color: #121212;
+      cursor: pointer;
+      border-radius: 5px;
+      margin-top: 10px;
+      font-weight: bold;
+      box-shadow: 0 0 5px;
+    }
+
+    .scoreboard {
+      margin-top: 10px;
+      font-size: 1.1rem;
+      text-shadow: 0 0 4px #00ffc3;
+    }
+
+    @media (max-width: 400px) {
+      .board {
+        grid-template-columns: repeat(3, 80px);
+        grid-template-rows: repeat(3, 80px);
+      }
+
+      .cell {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Tic Tac Toe</h1>
+  <div class="game-info" id="status">Player X's turn</div>
+
+  <div class="board" id="board">
+    <div class="cell" data-index="0"></div>
+    <div class="cell" data-index="1"></div>
+    <div class="cell" data-index="2"></div>
+    <div class="cell" data-index="3"></div>
+    <div class="cell" data-index="4"></div>
+    <div class="cell" data-index="5"></div>
+    <div class="cell" data-index="6"></div>
+    <div class="cell" data-index="7"></div>
+    <div class="cell" data-index="8"></div>
+  </div>
+
+  <div class="controls">
+    <button onclick="resetGame()">🔄 Reset</button>
+    <div class="scoreboard" id="score">X: 0 | O: 0</div>
+  </div>
+
+  <!-- Sound Effects -->
+  <audio id="moveSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_fef6d1a837.mp3"></audio>
+  <audio id="winSound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_2c9e8b6d07.mp3"></audio>
+  <audio id="drawSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_1d918508a2.mp3"></audio>
+
+  <script>
+    const cells = document.querySelectorAll('.cell');
+    const statusText = document.getElementById('status');
+    const scoreText = document.getElementById('score');
+    const moveSound = document.getElementById('moveSound');
+    const winSound = document.getElementById('winSound');
+    const drawSound = document.getElementById('drawSound');
+
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let currentPlayer = "X";
+    let running = true;
+    let score = { X: 0, O: 0 };
+
+    const winPatterns = [
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      [0, 4, 8],
+      [2, 4, 6]
+    ];
+
+    cells.forEach(cell => cell.addEventListener('click', cellClicked));
+
+    function cellClicked() {
+      const index = this.dataset.index;
+      if (board[index] !== "" || !running) return;
+
+      board[index] = currentPlayer;
+      this.textContent = currentPlayer;
+      moveSound.play();
+
+      checkWinner();
+    }
+
+    function checkWinner() {
+      let roundWon = false;
+
+      for (let i = 0; i < winPatterns.length; i++) {
+        const [a, b, c] = winPatterns[i];
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          roundWon = true;
+          highlightWinner(a, b, c);
+          break;
+        }
+      }
+
+      if (roundWon) {
+        statusText.textContent = `Player ${currentPlayer} wins! 🎉`;
+        score[currentPlayer]++;
+        updateScore();
+        running = false;
+        winSound.play();
+      } else if (!board.includes("")) {
+        statusText.textContent = "It's a draw! 😐";
+        running = false;
+        drawSound.play();
+      } else {
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        statusText.textContent = `Player ${currentPlayer}'s turn`;
+      }
+    }
+
+    function highlightWinner(a, b, c) {
+      cells[a].classList.add('win');
+      cells[b].classList.add('win');
+      cells[c].classList.add('win');
+    }
+
+    function updateScore() {
+      scoreText.textContent = `X: ${score.X} | O: ${score.O}`;
+    }
+
+    function resetGame() {
+      board = ["", "", "", "", "", "", "", "", ""];
+      currentPlayer = "X";
+      running = true;
+      statusText.textContent = `Player ${currentPlayer}'s turn`;
+      cells.forEach(cell => {
+        cell.textContent = "";
+        cell.classList.remove('win');
+      });
+    }
+  </script>
+</body>
+</html>
