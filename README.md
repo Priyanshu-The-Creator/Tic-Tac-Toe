@@ -1,2 +1,2 @@
 # Tic-Tac-Toe
-A classic game with a modern glow! ✨ Smooth moves, vibrant vibes, and a dash of friendly rivalry. Tap into the thrill of every turn – where strategy meets style. Whether you're X or O, the fun never stops. One match is never enough… reset and play again..! 🔁🔥
+A polished and visually engaging Tic Tac Toe game with a modern gradient interface, smooth animations, responsive layout, and clear gameplay feedback. Enjoy classic X vs O action with smart win detection, highlighted wins, draw handling, and instant reset. Professionally designed and developed using HTML, CSS, and JavaScript by Priyanshu.
